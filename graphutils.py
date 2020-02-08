@@ -1,3 +1,5 @@
+from typing import List, Dict
+import math
 
 
 class Vertex:
@@ -19,19 +21,18 @@ class Vertex:
 	def __getitem__(self, key):
 		return self._verts_dict[key]
 
-	# Add two way connection
+	def __lt__(self, other):
+		return str(self) < str(other)
+
+	def keys(self) -> List:
+		return self._keys_list
+
 	def connect(self, vertex: "Vertex", weigh: float) -> None:
 		self._verts_dict.update({vertex: weigh})
 		self._keys_list.append(vertex)
-		# the other way
-		vertex._verts_dict.update({self: weigh})
-		vertex._keys_list.append(self)
-
-	def keys(self) -> list:
-		return self._keys_list
 
 
-class VertexIterator():
+class VertexIterator:
 	def __init__(self, vertex):
 		self._vertex = vertex
 		self._keys = vertex.keys()
@@ -50,8 +51,20 @@ class VertexIterator():
 
 
 class Graph:
-	def __init__(self):
+	def __init__(self, *args, **kwargs):
 		self._vertices = []
+		# Fields to be initialized in dijkstra_init
+		self._distance_dict = None
+		self._queue = None
+		self._source = None
+		self._destination = None
+		self._iter = None
+		self._vert = None
+		self._vert_iter = None
+		self._done_with_for_loop = None
+
+		for arg in args:
+			self._vertices.append(arg)
 
 	def __getitem__(self, key):
 		return self._vertices[key]
@@ -62,8 +75,77 @@ class Graph:
 	def __len__(self):
 		return len(self._vertices)
 
-	def append(self, vertex: Vertex):
+	def append(self, vertex: Vertex) -> None:
 		self._vertices.append(vertex)
+
+	def connect(self, vert_1: Vertex, vert_2: Vertex, weigh: float) -> None:
+		if vert_1 in self._vertices and vert_2 in self._vertices:
+			vert_1.connect(vert_2, weigh)
+			vert_2.connect(vert_1, weigh)
+
+	def dijkstra(self, source: Vertex, destination: Vertex) -> Dict[Vertex, float]:
+		distance_dict = {vert: math.inf for vert in self._vertices}
+		distance_dict[source] = 0
+		queue = {k: v for k, v in sorted(distance_dict.items(), key=lambda item: item[1])}
+
+		while len(queue) > 0:
+			vert = next(iter(queue))
+			queue.pop(vert)
+
+			for conn in vert:
+				neighbor, weigh = conn[0], conn[1]
+
+				if distance_dict[vert] + weigh < distance_dict[neighbor]:
+					distance_dict[neighbor] = distance_dict[vert] + weigh
+					queue[neighbor] = distance_dict[vert] + weigh
+
+					queue = {k: v for k, v in sorted(queue.items(), key=lambda item: item[1])}
+
+		return distance_dict[destination]
+
+	def dijkstra_init(self, source: Vertex, destination: Vertex) -> None:
+		self._distance_dict = {vert: math.inf for vert in self._vertices}
+		self._distance_dict[source] = 0
+		self._queue = {k: v for k, v in sorted(self._distance_dict.items(), key=lambda item: item[1])}
+		self._source = source
+		self._destination = destination
+		self._vert = next(iter(self._queue))
+		self._done_with_for_loop = True
+
+	def dijkstra_step(self, steps=1) -> None:
+		if steps == 0:
+			return
+
+		steps -= 1
+		self.dijkstra_step(steps)
+
+		# Step by step while loop from self.dijkstra
+		if len(self._queue) > 0 and self._done_with_for_loop is True:
+			self._vert = next(iter(self._queue))
+			self._vert_iter = iter(self._vert)
+
+			self._queue.pop(self._vert)
+			self._done_with_for_loop = False
+
+		# Step by step for loop
+		try:
+			conn = next(self._vert_iter)
+			neighbor, weigh = conn[0], conn[1]
+			vert = self._vert
+
+			if self._distance_dict[vert] + weigh < self._distance_dict[neighbor]:
+				self._distance_dict[neighbor] = self._distance_dict[vert] + weigh
+				self._queue[neighbor] = self._distance_dict[vert] + weigh
+
+				self._queue = {k: v for k, v in sorted(self._queue.items(), key=lambda item: item[1])}
+		except StopIteration:
+			self._done_with_for_loop = True
+
+	def get_distance_dict(self) -> Dict[Vertex, float]:
+		return self._distance_dict
+
+	def get_curr_vert(self) -> Vertex:
+		return self._vert
 
 
 class GraphIterator:
@@ -84,22 +166,38 @@ class GraphIterator:
 
 
 if __name__ == "__main__":
+	# Example
 	vert_a = Vertex("vert_a")
 	vert_b = Vertex("vert_b")
 	vert_c = Vertex("vert_c")
+	vert_d = Vertex("vert_d")
+	vert_e = Vertex("vert_e")
+	vert_f = Vertex("vert_f")
 
-	vert_a.connect(vert_b, 10)
-	vert_a.connect(vert_c, 20)
+	graph = Graph(vert_a, vert_b, vert_c, vert_d, vert_e, vert_f)
 
-	graph = Graph()
-	graph.append(vert_a)
-	graph.append(vert_b)
-	graph.append(vert_c)
+	graph.connect(vert_a, vert_c, 14)
+	graph.connect(vert_a, vert_d, 9)
+	graph.connect(vert_a, vert_e, 7)
 
-	for i in vert_a:
-		print(i)
+	graph.connect(vert_b, vert_c, 9)
+	graph.connect(vert_b, vert_f, 6)
 
-	for vert in graph:
-		print(vert)
+	graph.connect(vert_d, vert_c, 2)
+	graph.connect(vert_d, vert_e, 10)
+	graph.connect(vert_d, vert_f, 11)
+
+	graph.connect(vert_e, vert_f, 15)
+
+	graph.dijkstra(vert_a, vert_b)
+
+	# Show algorithm step by step
+	graph.dijkstra_init(vert_a, vert_b)
+	graph.dijkstra_step(15)
+
+	distance_dict = graph.get_distance_dict()
+	for key in distance_dict:
+		print(str(key) + " " + str(distance_dict[key]))
+
 
 
