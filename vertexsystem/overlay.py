@@ -1,10 +1,10 @@
 from PySide2 import QtWidgets, QtGui, QtCore
 from PySide2.QtCore import QPoint
-from typing import List
+from typing import List, Tuple
 from math import atan, sin, cos
 
 
-def adjust_line(a: QPoint, b: QPoint, r: int) -> tuple[QPoint, QPoint]:
+def adjust_line(a: QPoint, b: QPoint, r: int) -> Tuple[QPoint, QPoint]:
 	if a.x() > b.x():
 		a, b = b, a
 	elif a.x() == b.x():

@@ -1,5 +1,4 @@
 from typing import Dict
-
 from vertexsystem.vertex import *
 from vertexsystem.overlay import *
 from graphutils import Graph, Vertex
@@ -88,7 +87,7 @@ class GraphWidget(QtWidgets.QDialog):
 		self._overlay.update()
 
 	# Generate QPoints coordinates to place vertices
-	def _generate_points(self, count: int) -> List[int, int]:
+	def _generate_points(self, count: int) -> Tuple[int, int]:
 		r = min(GraphWidget.width, GraphWidget.height) / 2 - 3
 		center = (GraphWidget.width / 2, GraphWidget.height / 2)
 		alpha = 360 / count
