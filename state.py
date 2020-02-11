@@ -41,6 +41,7 @@ class SelectSourceState(State):
 
 	def set_source_vertex(self, vertex_widget):
 		print("selected: " + str(vertex_widget.get_vertex()))
+		vertex_widget.select_animatinon()
 		State.window.set_source(vertex_widget.get_vertex())
 		State.window.set_state(SelectDestinationState())
 

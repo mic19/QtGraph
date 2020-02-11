@@ -81,6 +81,42 @@ class VertexWidget(QtWidgets.QLabel):
 	def get_vertex(self) -> Vertex:
 		return self._vertex
 
+	def select_animatinon(self) -> None:
+		parent = self.parentWidget()
+		parent.animate_circle()
+
+
+"""
+Widget to animate circle select on VertexWidget inside DragAnDropWidget
+"""
+class SelectCircleWidget(QtWidgets.QLabel):
+	def __init__(self, parent, controller: "DragAndDropWidget"):
+		super().__init__(parent)
+
+		self._pixmap = QtGui.QPixmap('C:/Users/michael/Desktop/circle_select.png')
+		super().setPixmap(self._pixmap)
+
+		self._initial_width = self._pixmap.width()
+		self._initial_height = self._pixmap.height()
+		self._initial_pixmap = self._pixmap
+		self._controller = controller
+
+		self.resize(self._initial_pixmap.size())
+
+	def set_scale(self, scale: float) -> None:
+		self._pixmap = self._initial_pixmap.scaled(scale * self._initial_width, scale * self._initial_height)
+		super().setPixmap(self._pixmap)
+		self._controller.position_label()
+
+	def get_scale(self) -> float:
+		self._initial_height / self._pixmap.height()
+
+	def get_pixmap(self) -> QtGui.QPixmap:
+		return self._pixmap
+
+	scale = QtCore.Property(float, get_scale, set_scale)
+
+
 """
 Widget contains exactly one VertexWidget.
 The VertexWidget object can be replaced (by dragging) between two DragAndDropWidgets
@@ -108,6 +144,7 @@ class DragAndDropWidget(QtWidgets.QWidget):
 		self.setFixedSize(size, size)
 
 		DragAndDropWidget.grid_layout = parent.layout()
+		self._label = None
 
 	def dragEnterEvent(self, event):
 		if event.mimeData().hasText():
@@ -138,7 +175,6 @@ class DragAndDropWidget(QtWidgets.QWidget):
 		qp.begin(self)
 
 		qp.setPen(QtGui.QColor(200, 200, 200))
-		qp.setBrush(QtGui.QColor(200, 200, 200))
 
 		size = self.size()
 		width = size.width() - 1
@@ -149,7 +185,32 @@ class DragAndDropWidget(QtWidgets.QWidget):
 		qp.drawLine(width, height, width, 0)
 		qp.drawLine(width, height, 0, height)
 
+		qp.setPen(QtGui.QColor(0, 0, 250))
+
 		qp.end()
 
 	def set_vertex(self, vertex: Vertex) -> None:
 		self._vertex = vertex
+
+	def animate_circle(self) -> None:
+		parent = self.parentWidget()
+		self._label = SelectCircleWidget(parent, self)
+
+		self.position_label()
+		self._label.show()
+
+		self.anim = QtCore.QPropertyAnimation(self._label, b"scale")
+		self.anim.setDuration(500)
+		self.anim.setStartValue(1)
+		self.anim.setEndValue(0.1)
+		self.anim.start()
+
+		QtCore.QObject.connect(self.anim, QtCore.SIGNAL('finished()'), self._label, QtCore.SLOT('deleteLater()'))
+
+	def position_label(self) -> None:
+		pixmap = self._label.get_pixmap()
+		width, height = pixmap.width(), pixmap.height()
+		position = self.pos() + QPoint(int(self.size().width() / 2), int(self.size().height() / 2))
+		position -= QPoint(int(width / 2), int(height / 2))
+		self._label.move(position)
+		self._label.resize(width, height)

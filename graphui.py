@@ -3,6 +3,29 @@ from vertexsystem.vertex import *
 from vertexsystem.overlay import *
 from graphutils import Graph, Vertex
 
+
+# Generate QPoints coordinates to place vertices
+def generate_points(count: int) -> Tuple[int, int]:
+	r = min(GraphWidget.width, GraphWidget.height) / 2 - 3
+	center = (GraphWidget.width / 2, GraphWidget.height / 2)
+	alpha = 360 / count
+
+	for i in range(count):
+		angle = alpha * i
+		x, y = r * sin(angle), r * cos(angle)
+
+		if alpha * i <= 90:
+			pass
+		elif alpha * i <= 180:
+			y = -1 * y
+		elif alpha * i <= 270:
+			x, y = -1 * x, -1 * y
+		elif alpha * i <= 360:
+			x = -1 * x
+
+		yield center[0] + x, center[1] + y
+
+
 class GraphWidget(QtWidgets.QDialog):
 	# Width and height are number of cells in grid - horizontally and vertically
 	width = 30
@@ -29,7 +52,7 @@ class GraphWidget(QtWidgets.QDialog):
 				layout.addWidget(DragAndDropWidget(self, empty_vertex), i, j)
 				empty_vertex.update_position()
 
-		for vert, point in zip(graph, self._generate_points(len(graph))):
+		for vert, point in zip(graph, generate_points(len(graph))):
 			item_to_remove = layout.itemAtPosition(point[0], point[1])
 			widget = item_to_remove.widget()
 			layout.removeItem(item_to_remove)
@@ -57,8 +80,6 @@ class GraphWidget(QtWidgets.QDialog):
 
 	def paintEvent(self, event: QtGui.QPaintEvent):
 		edges = []
-		arrows = []
-		iter = 0
 
 		for vert in self._graph:
 			for conn in vert:
@@ -85,27 +106,6 @@ class GraphWidget(QtWidgets.QDialog):
 
 		self._overlay.set_edges(edges)
 		self._overlay.update()
-
-	# Generate QPoints coordinates to place vertices
-	def _generate_points(self, count: int) -> Tuple[int, int]:
-		r = min(GraphWidget.width, GraphWidget.height) / 2 - 3
-		center = (GraphWidget.width / 2, GraphWidget.height / 2)
-		alpha = 360 / count
-
-		for i in range(count):
-			angle = alpha * i
-			x, y = r * sin(angle), r * cos(angle)
-
-			if alpha * i <= 90:
-				pass
-			elif alpha * i <= 180:
-				y = -1 * y
-			elif alpha * i <= 270:
-				x, y = -1 * x, -1 * y
-			elif alpha * i <= 360:
-				x = -1 * x
-
-			yield center[0] + x, center[1] + y
 
 	def get_dict(self) -> Dict[Vertex, VertexWidget]:
 		return self._vert_widget_dict
