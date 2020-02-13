@@ -39,6 +39,7 @@ class GraphWidget(QtWidgets.QDialog):
 		self._graph = graph
 		self._vert_widget_dict = {}
 		self._vert_point_dict = {}
+		self._vertex_color = QtGui.QColor(150, 150, 150)
 
 		layout = QtWidgets.QGridLayout(self)
 		layout.setHorizontalSpacing(0)
@@ -58,7 +59,7 @@ class GraphWidget(QtWidgets.QDialog):
 			layout.removeItem(item_to_remove)
 			widget.deleteLater()
 
-			vertex_widget = VertexWidget(self, QtGui.QColor(150, 150, 150), vertex=vert)
+			vertex_widget = VertexWidget(self, self._vertex_color, vertex=vert)
 			vertex_widget.set_text("a")
 			vertex_widget.setToolTip(str(vert))
 			drag_drop_vert = DragAndDropWidget(self, vertex_widget)
@@ -107,8 +108,29 @@ class GraphWidget(QtWidgets.QDialog):
 		self._overlay.set_edges(edges)
 		self._overlay.update()
 
+	def add_vertex(self, vertex: Vertex, x: int, y: int) -> None:
+		self._graph.append(vertex)
+		vertex_widget = VertexWidget(self, color=self._vertex_color, vertex=vertex)
+
+		self._vert_widget_dict.update({vertex: vertex_widget})
+		self._vert_point_dict.update({vertex_widget: QPoint(x, y)})
+		self.layout.addWidget(vertex_widget, x, y)
+
 	def get_dict(self) -> Dict[Vertex, VertexWidget]:
 		return self._vert_widget_dict
+
+	def get_grid_cell(self, qpoint: QPoint) -> Tuple[int]:
+		drop_widget = self.childAt(qpoint)
+		index = self.layout.indexOf(drop_widget)
+
+		# In case we click VertexWidget instead of DragAndDropWidget
+		if index == -1:
+			vertex_widget = drop_widget
+			drop_widget = vertex_widget.get_drag_and_drop()
+			index = self.layout.indexOf(drop_widget)
+
+		position = self.layout.getItemPosition(index)
+		return position[0], position[1]
 
 	def dijkstra_init(self, source: Vertex, destination: Vertex) -> None:
 		self._graph.dijkstra_init(source, destination)

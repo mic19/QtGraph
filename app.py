@@ -69,11 +69,11 @@ if __name__ == '__main__':
 	# Example
 	app = QtWidgets.QApplication(sys.argv)
 
-	vert_a = Vertex("vert_a")
-	vert_b = Vertex("vert_b")
-	vert_c = Vertex("vert_c")
-	vert_d = Vertex("vert_d")
-	vert_e = Vertex("vert_e")
+	vert_a = Vertex("a")
+	vert_b = Vertex("b")
+	vert_c = Vertex("c")
+	vert_d = Vertex("d")
+	vert_e = Vertex("e")
 
 	graph = Graph()
 	graph.append(vert_a)

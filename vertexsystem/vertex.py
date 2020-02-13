@@ -81,6 +81,9 @@ class VertexWidget(QtWidgets.QLabel):
 	def get_vertex(self) -> Vertex:
 		return self._vertex
 
+	def get_drag_and_drop(self) -> "DragAndDropWidget":
+		return self.parentWidget()
+
 	def select_animatinon(self) -> None:
 		parent = self.parentWidget()
 		parent.animate_circle()
@@ -93,7 +96,7 @@ class SelectCircleWidget(QtWidgets.QLabel):
 	def __init__(self, parent, controller: "DragAndDropWidget"):
 		super().__init__(parent)
 
-		self._pixmap = QtGui.QPixmap('C:/Users/michael/Desktop/circle_select.png')
+		self._pixmap = QtGui.QPixmap('images/circle_select.png')
 		super().setPixmap(self._pixmap)
 
 		self._initial_width = self._pixmap.width()
@@ -135,10 +138,10 @@ class DragAndDropWidget(QtWidgets.QWidget):
 		self._content_layout.setContentsMargins(margin, margin, margin, margin)
 		self.setLayout(self._content_layout)
 
-		self._vertex = vertex_widget
-		if self._vertex is not None:
-			self._content_layout.addWidget(self._vertex)
-			self._vertex.setParent(self)
+		self._vertex_widget = vertex_widget
+		if self._vertex_widget is not None:
+			self._content_layout.addWidget(self._vertex_widget)
+			self._vertex_widget.setParent(self)
 
 		size = VertexWidget.vertex_size + 2 * margin
 		self.setFixedSize(size, size)
@@ -158,11 +161,11 @@ class DragAndDropWidget(QtWidgets.QWidget):
 			vertex_source = event.source()
 
 			if vertex_source not in self.children():
-				self._content_layout.removeWidget(self._vertex)
+				self._content_layout.removeWidget(self._vertex_widget)
 
-				self.set_vertex(vertex_source)
-				self._content_layout.addWidget(self._vertex)
-				self._vertex.setParent(self)
+				self.set_vertex_widget(vertex_source)
+				self._content_layout.addWidget(self._vertex_widget)
+				self._vertex_widget.setParent(self)
 
 				vertex_source.clear()
 			else:
@@ -174,7 +177,8 @@ class DragAndDropWidget(QtWidgets.QWidget):
 		qp = QtGui.QPainter()
 		qp.begin(self)
 
-		qp.setPen(QtGui.QColor(200, 200, 200))
+		qpen = QtGui.QPen(QtGui.QColor(200, 200, 200))
+		qp.setPen(qpen)
 
 		size = self.size()
 		width = size.width() - 1
@@ -189,8 +193,12 @@ class DragAndDropWidget(QtWidgets.QWidget):
 
 		qp.end()
 
-	def set_vertex(self, vertex: Vertex) -> None:
-		self._vertex = vertex
+	def set_vertex_widget(self, vertex_widget: VertexWidget) -> None:
+		self._vertex_widget = vertex_widget
+		self._vertex_widget.setParent(self)
+
+	def get_vertex_widget(self) -> VertexWidget:
+		return self._vertex_widget
 
 	def animate_circle(self) -> None:
 		parent = self.parentWidget()
