@@ -60,7 +60,7 @@ class GraphWidget(QtWidgets.QDialog):
 			widget.deleteLater()
 
 			vertex_widget = VertexWidget(self, self._vertex_color, vertex=vert)
-			vertex_widget.set_text("a")
+			vertex_widget.set_text(str(vert))
 			vertex_widget.setToolTip(str(vert))
 			drag_drop_vert = DragAndDropWidget(self, vertex_widget)
 
@@ -110,11 +110,12 @@ class GraphWidget(QtWidgets.QDialog):
 
 	def add_vertex(self, vertex: Vertex, x: int, y: int) -> None:
 		self._graph.append(vertex)
-		vertex_widget = VertexWidget(self, color=self._vertex_color, vertex=vertex)
+		drag_and_drop = self.layout.itemAtPosition(x, y).widget()
+		vertex_widget = VertexWidget(parent=self, color=self._vertex_color, vertex=vertex, text=str(vertex))
+		drag_and_drop.set_vertex_widget(vertex_widget)
 
 		self._vert_widget_dict.update({vertex: vertex_widget})
 		self._vert_point_dict.update({vertex_widget: QPoint(x, y)})
-		self.layout.addWidget(vertex_widget, x, y)
 
 	def get_dict(self) -> Dict[Vertex, VertexWidget]:
 		return self._vert_widget_dict
@@ -131,6 +132,10 @@ class GraphWidget(QtWidgets.QDialog):
 
 		position = self.layout.getItemPosition(index)
 		return position[0], position[1]
+
+	def reset(self) -> None:
+		for key in self._vert_widget_dict:
+			self._vert_widget_dict[key].set_text(str(key))
 
 	def dijkstra_init(self, source: Vertex, destination: Vertex) -> None:
 		self._graph.dijkstra_init(source, destination)

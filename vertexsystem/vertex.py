@@ -26,6 +26,9 @@ class VertexWidget(QtWidgets.QLabel):
 		self.setText(str(self))
 		self.mimeText = self.text()
 
+		if self._vertex is not None:
+			self._text = str(self._vertex)
+
 	def paintEvent(self, event: QtGui.QPaintEvent):
 		qp = QtGui.QPainter()
 		qp.begin(self)
@@ -194,8 +197,15 @@ class DragAndDropWidget(QtWidgets.QWidget):
 		qp.end()
 
 	def set_vertex_widget(self, vertex_widget: VertexWidget) -> None:
+		self.remove_vertex_widget()
 		self._vertex_widget = vertex_widget
 		self._vertex_widget.setParent(self)
+		self.layout().addWidget(vertex_widget)
+
+	def remove_vertex_widget(self) -> None:
+		self.layout().removeWidget(self._vertex_widget)
+		self._vertex_widget.deleteLater()
+		self._vertex_widget = None
 
 	def get_vertex_widget(self) -> VertexWidget:
 		return self._vertex_widget

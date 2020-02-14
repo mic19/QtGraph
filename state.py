@@ -46,15 +46,10 @@ class DefaultState(State):
 		menu.exec_(event.globalPos())
 
 	def add_vertex(self):
-		vert = Vertex("new")
-		#print("-------------------------")
+		vert = Vertex()
 
 		pos = self.gw.get_grid_cell(self.event.pos())
 		self.gw.add_vertex(vert, pos[0], pos[1])
-
-		#print(self.event.pos())
-		#print(pos)
-
 
 
 class BuildGraphState(State):
@@ -80,6 +75,7 @@ class SelectSourceState(State):
 
 	def reset_click(self):
 		State.window.set_state(DefaultState())
+		State.graph_widget.reset()
 
 
 class SelectDestinationState(State):
@@ -104,6 +100,7 @@ class SelectDestinationState(State):
 
 	def reset_click(self):
 		State.window.set_state(DefaultState())
+		State.graph_widget.reset()
 
 
 class AlgorithmState(State):
@@ -120,3 +117,4 @@ class AlgorithmState(State):
 
 	def reset_click(self):
 		State.window.set_state(DefaultState())
+		State.graph_widget.reset()

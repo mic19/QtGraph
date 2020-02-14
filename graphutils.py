@@ -1,12 +1,21 @@
 from typing import List, Dict
 import math
+import string
 
 
 class Vertex:
-	def __init__(self, name):
+	available_names = list(string.ascii_lowercase)
+
+	def __init__(self, name=None):
 		# Dictionary of vertices this vertex is connected to {other_vertex, weigh}
 		self._verts_dict = {}
+
+		if name in Vertex.available_names:
+			Vertex.available_names.remove(name)
+		elif name is None:
+			name = Vertex.available_names.pop(0)
 		self._name = name
+
 		self._keys_list = []
 
 	def __iter__(self):
