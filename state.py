@@ -29,6 +29,13 @@ class DefaultState(State):
 
 		self.gw = State.graph_widget
 		self.gw.contextMenuEvent = self.context_menu
+		self.event = None
+
+		self.connection_source = None
+		self.connection_destination = None
+		self.source = None
+		self.destination = None
+		self.popup = None
 
 	def select_click(self):
 		State.window.set_state(SelectSourceState())
@@ -37,10 +44,19 @@ class DefaultState(State):
 	def context_menu(self, event):
 		self.gw = State.graph_widget
 		menu = QtWidgets.QMenu(self.gw)
-		action = QtWidgets.QAction("Add Vertex")
+		add_action = QtWidgets.QAction("Add Vertex")
+		connect_action = QtWidgets.QAction("Connect")
 
-		menu.addAction(action)
-		action.triggered.connect(self.add_vertex)
+		menu.addAction(add_action)
+		menu.addAction(connect_action)
+
+		add_action.triggered.connect(self.add_vertex)
+		connect_action.triggered.connect(self.add_connection)
+
+		# If menu is not over any vertex then disable connection
+		if self.gw.childAt(event.pos()).is_empty() is True:
+			connect_action.setDisabled(True)
+
 		self.event = event
 
 		menu.exec_(event.globalPos())
@@ -51,10 +67,35 @@ class DefaultState(State):
 		pos = self.gw.get_grid_cell(self.event.pos())
 		self.gw.add_vertex(vert, pos[0], pos[1])
 
+	def add_connection(self):
+		vert = self.gw.childAt(self.event.pos()).get_vertex()
+		if self.connection_source is None:
+			self.connection_source = vert
+		elif self.connection_destination is None and self.connection_source != vert:
+			self.connection_destination = vert
 
-class BuildGraphState(State):
-	def __init__(self):
-		super().__init__()
+			# Popup to insert connection weigh
+			self.popup = self.make_dialog()
+			self.popup.show()
+
+			self.gw.add_connection(self.connection_source, self.connection_destination)
+			self.source = self.connection_source
+			self.destination = self.connection_destination
+			self.connection_source = None
+			self.connection_destination = None
+
+	def make_dialog(self):
+		popup = QtWidgets.QInputDialog(State.graph_widget)
+		popup.setLabelText("Insert the connection weigh")
+		popup.setInputMode(QtWidgets.QInputDialog.IntInput)
+
+		popup.intValueChanged.connect(self.change_connection)
+		return popup
+
+	def change_connection(self, event):
+		weigh = self.popup.intValue()
+		State.graph_widget.remove_connection(self.source, self.destination)
+		State.graph_widget.add_connection(self.source, self.destination, weigh)
 
 
 class SelectSourceState(State):

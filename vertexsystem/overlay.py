@@ -41,7 +41,7 @@ class OverlayWidget(QtWidgets.QWidget):
 		qp = QtGui.QPainter()
 		qp.begin(self)
 
-		edge_color = QtGui.QColor(250, 10, 10)
+		edge_color = QtGui.QColor(200, 200, 200)
 		text_color = QtGui.QColor(10, 10, 10)
 
 		qpen = QtGui.QPen(edge_color)

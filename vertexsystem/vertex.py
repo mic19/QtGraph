@@ -91,6 +91,11 @@ class VertexWidget(QtWidgets.QLabel):
 		parent = self.parentWidget()
 		parent.animate_circle()
 
+	def is_empty(self) -> bool:
+		if self._vertex is None:
+			return True
+		return False
+
 
 """
 Widget to animate circle select on VertexWidget inside DragAnDropWidget
@@ -180,7 +185,7 @@ class DragAndDropWidget(QtWidgets.QWidget):
 		qp = QtGui.QPainter()
 		qp.begin(self)
 
-		qpen = QtGui.QPen(QtGui.QColor(200, 200, 200))
+		qpen = QtGui.QPen(QtGui.QColor(220, 220, 220))
 		qp.setPen(qpen)
 
 		size = self.size()
@@ -192,12 +197,9 @@ class DragAndDropWidget(QtWidgets.QWidget):
 		qp.drawLine(width, height, width, 0)
 		qp.drawLine(width, height, 0, height)
 
-		qp.setPen(QtGui.QColor(0, 0, 250))
-
 		qp.end()
 
 	def set_vertex_widget(self, vertex_widget: VertexWidget) -> None:
-		self.remove_vertex_widget()
 		self._vertex_widget = vertex_widget
 		self._vertex_widget.setParent(self)
 		self.layout().addWidget(vertex_widget)
@@ -232,3 +234,6 @@ class DragAndDropWidget(QtWidgets.QWidget):
 		position -= QPoint(int(width / 2), int(height / 2))
 		self._label.move(position)
 		self._label.resize(width, height)
+
+	def is_empty(self):
+		return self._vertex_widget.is_empty()

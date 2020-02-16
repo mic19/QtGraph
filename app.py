@@ -69,11 +69,16 @@ if __name__ == '__main__':
 	# Example
 	app = QtWidgets.QApplication(sys.argv)
 
-	vert_a = Vertex("a")
-	vert_b = Vertex("b")
-	vert_c = Vertex("c")
-	vert_d = Vertex("d")
-	vert_e = Vertex("e")
+	vert_a = Vertex()
+	vert_b = Vertex()
+	vert_c = Vertex()
+	vert_d = Vertex()
+	vert_e = Vertex()
+	vert_f = Vertex()
+	vert_g = Vertex()
+	vert_h = Vertex()
+	vert_i = Vertex()
+	vert_j = Vertex()
 
 	graph = Graph()
 	graph.append(vert_a)
@@ -81,11 +86,31 @@ if __name__ == '__main__':
 	graph.append(vert_c)
 	graph.append(vert_d)
 	graph.append(vert_e)
+	graph.append(vert_f)
+	graph.append(vert_g)
+	graph.append(vert_h)
+	graph.append(vert_i)
+	graph.append(vert_j)
 
-	graph.connect(vert_a, vert_b, 10)
-	graph.connect(vert_a, vert_c, 20)
-	graph.connect(vert_b, vert_d, 10)
+	graph.connect(vert_a, vert_b, 1)
+	graph.connect(vert_a, vert_c, 2)
+	graph.connect(vert_b, vert_d, 1)
 	graph.connect(vert_e, vert_a, 7)
+
+	graph.connect(vert_a, vert_f, 4)
+	graph.connect(vert_a, vert_g, 3)
+	graph.connect(vert_h, vert_d, 3)
+	graph.connect(vert_j, vert_e, 4)
+
+	graph.connect(vert_j, vert_b, 5)
+	graph.connect(vert_i, vert_c, 6)
+	graph.connect(vert_h, vert_g, 7)
+	graph.connect(vert_i, vert_f, 7)
+
+	graph.connect(vert_a, vert_e, 8)
+	graph.connect(vert_c, vert_i, 2)
+	graph.connect(vert_b, vert_j, 4)
+	graph.connect(vert_e, vert_h, 7)
 
 	# UI
 	window = GraphMainWindow(graph)

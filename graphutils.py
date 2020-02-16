@@ -40,6 +40,10 @@ class Vertex:
 		self._verts_dict.update({vertex: weigh})
 		self._keys_list.append(vertex)
 
+	def disconnect(self, vertex: "Vertex") -> None:
+		self._verts_dict.pop(vertex)
+		self._keys_list.remove(vertex)
+
 
 class VertexIterator:
 	def __init__(self, vertex):
@@ -91,6 +95,11 @@ class Graph:
 		if vert_1 in self._vertices and vert_2 in self._vertices:
 			vert_1.connect(vert_2, weigh)
 			vert_2.connect(vert_1, weigh)
+
+	def disconnect(self, vert_1: Vertex, vert_2: Vertex) -> None:
+		if vert_1 in self._vertices and vert_2 in self._vertices:
+			vert_1.disconnect(vert_2)
+			vert_2.disconnect(vert_1)
 
 	def dijkstra(self, source: Vertex, destination: Vertex) -> Dict[Vertex, float]:
 		distance_dict = {vert: math.inf for vert in self._vertices}

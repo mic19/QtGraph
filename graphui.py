@@ -39,7 +39,7 @@ class GraphWidget(QtWidgets.QDialog):
 		self._graph = graph
 		self._vert_widget_dict = {}
 		self._vert_point_dict = {}
-		self._vertex_color = QtGui.QColor(150, 150, 150)
+		self._vertex_color = QtGui.QColor(51, 153, 255)
 
 		layout = QtWidgets.QGridLayout(self)
 		layout.setHorizontalSpacing(0)
@@ -69,7 +69,8 @@ class GraphWidget(QtWidgets.QDialog):
 
 		self.layout = layout
 
-		qsize = QtCore.QSize(DragAndDropWidget.dag_size * GraphWidget.width + 50,DragAndDropWidget.dag_size * GraphWidget.height + 50)
+		h, w = DragAndDropWidget.dag_size * GraphWidget.width + 50, DragAndDropWidget.dag_size * GraphWidget.height + 50
+		qsize = QtCore.QSize(h, w)
 		self.setMinimumSize(qsize)
 
 		# Widget on top of everything (drawing edges)
@@ -112,10 +113,17 @@ class GraphWidget(QtWidgets.QDialog):
 		self._graph.append(vertex)
 		drag_and_drop = self.layout.itemAtPosition(x, y).widget()
 		vertex_widget = VertexWidget(parent=self, color=self._vertex_color, vertex=vertex, text=str(vertex))
+		drag_and_drop.remove_vertex_widget()
 		drag_and_drop.set_vertex_widget(vertex_widget)
 
 		self._vert_widget_dict.update({vertex: vertex_widget})
 		self._vert_point_dict.update({vertex_widget: QPoint(x, y)})
+
+	def add_connection(self, source: Vertex, destination: Vertex, weigh: int = 1) -> None:
+		self._graph.connect(source, destination, weigh)
+
+	def remove_connection(self, source: Vertex, destination: Vertex) -> None:
+		self._graph.disconnect(source, destination)
 
 	def get_dict(self) -> Dict[Vertex, VertexWidget]:
 		return self._vert_widget_dict
